@@ -15,7 +15,7 @@ let port = process.env.PORT || 4000;
 connectDB();
 
 
-app.use(cors({origin:'https://frontendticketing.onrender.com/',credentials:true}))
+app.use(cors({credentials:true}))
 app.use(express.json())
 app.use("/auth",authRouter)
 app.use("/event",eventRouter)
