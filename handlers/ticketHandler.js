@@ -6,7 +6,8 @@ exports.newTicket = async (req, res) => {
   const { valid, valeur } = req.body;
   const user = req.user;
   const { id } = req.params;
-
+ console.log(id);
+ 
   try {
     const currentEvent = await eventSchema.findById(id);
     if (!currentEvent) {
@@ -17,7 +18,12 @@ exports.newTicket = async (req, res) => {
       (acc, ticket) => acc + ticket.quantity,
       0
     );
+
+   
+    
     const nvTicket = new ticketSchema({ event: id, user: user._id,seatType:valeur });
+    // console.log(nvTicket);
+    
     if (totalTickets === 0) {
       await currentEvent.updateOne({ isActive: false });
       return res.status(400).json({ msg: "Ticket stock is empty now :(" });
@@ -25,16 +31,15 @@ exports.newTicket = async (req, res) => {
 
     if (valid === true) {
       const updateResult = await eventSchema.updateOne(
+        { "ticketsAvailable": { "$elemMatch": { "catType": valeur, "quantity":{$gt :0} } }, _id :id },
         {
-          _id: id,
-          "ticketsAvailable.catType": valeur,
-          "ticketsAvailable.quantity": { $gt: 0 }
-        },
-        {
-          $inc: { "ticketsAvailable.$.quantity": -1 },
-          $push: { soldTickets: nvTicket._id }
+          $inc: { "ticketsAvailable.$.quantity": -1,"nbrSold.$.quantity":1 },
+          $push: { soldTickets: nvTicket._id },
+          // $set:{"nbrSold.$.seatType":valeur}
+          
         }
       );
+
 
       if (updateResult.modifiedCount === 0) {
         return res.status(400).json({ msg: "Tickets are all sold" });
@@ -103,6 +108,7 @@ exports.newTicket = async (req, res) => {
 
 exports.cancelTicket = async (req, res) => {
   const { id } = req.params;
+  const {valeur}=req.body
 console.log(id);
 
   try {
@@ -111,7 +117,16 @@ console.log(id);
       return res.status(400).json({ msg: "No ticket found with this ID" });
     }
 
-    // await eventSchema.findByIdAndUpdate(ticket.event, { $inc: { "ticketsAvailable.$.quantity": 1 } }, { new: true });
+    await eventSchema.updateOne(
+      { "ticketsAvailable": { "$elemMatch": { "catType": valeur, "quantity":{$gt :0} } }, _id :ticket.event },
+      {
+        $inc: { "ticketsAvailable.$.quantity": 1,"nbrSold.$.quantity":-1 },
+        $pull: { soldTickets: id },
+        // $set:{"nbrSold.$.seatType":valeur}
+        
+      }
+    )
+
 
     res.status(200).json({ msg: "Ticket cancelled successfully", ticket });
   } catch (error) {
@@ -130,8 +145,8 @@ exports.getTicket = async (req, res) => {
       return res.status(400).json({ msg: "No ticket found with this ID" });
     }
 
-    const { location } = ticket.event;
-    res.status(200).json({ msg: "Ticket found", location });
+    let {seatType} = ticket
+    res.status(200).json({ msg: "Ticket found",seatType });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Server error occurred" });
