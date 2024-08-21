@@ -16,7 +16,8 @@ let port = process.env.PORT || 4000;
 connectDB();
 
 
-app.use(cors({origin:'http://localhost:3000' ,credentials:true}))
+app.use(cors({  origin: ['http://localhost:3000', 'https://kossli-maak.onrender.com'], // Allow both local and production URLs
+    credentials:true}))
 
 app.use(express.json())
 app.use("/auth",authRouter)
