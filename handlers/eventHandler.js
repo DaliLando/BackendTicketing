@@ -68,7 +68,7 @@ await ticketSchema.deleteMany({event:id})
 }
 exports.getAllEvents = async (req, res) => {
     try {
-      const events = await eventSchema.find();
+      const events = await eventSchema.find().populate('soldTickets');
       res.status(200).json(events);
     } catch (error) {
       res.status(500).json({ msg: "Server error occurred" });
@@ -92,5 +92,17 @@ exports.findCategory = async (req, res) => {
     })
     .catch((err)=>{
       console.error(err);
+    })
+  }
+
+  exports.findEvent = async (req,res)=> {
+    let {id}=req.params
+    await eventSchema.findById(id)
+    .then ((doc)=>{
+      return res.status(200).json({msg:"event fetched",doc})
+    })
+    .catch ((err)=>{
+      console.error(err);
+      
     })
   }

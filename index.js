@@ -1,7 +1,7 @@
 const express = require ("express");
 const connectDB = require("./config/dbconnect");
 const authRouter = require("./routes/authRoute");
-const eventRouter = require("./routes/eventRoute");
+// const eventRouter = require("./routes/eventRoute");
 const cors = require ("cors");
 const ticketRouter = require("./routes/ticketRoute");
 const userRouter = require("./routes/userRoute");
@@ -17,10 +17,10 @@ connectDB();
 
 
 app.use(cors({origin:'http://localhost:3000' }))
-app.use(cors({credentials:true}))
+// app.use(cors({credentials:true}))
 app.use(express.json())
 app.use("/auth",authRouter)
-app.use("/event",eventRouter)
+// app.use("/event",eventRouter)
 app.use("/ticket",ticketRouter)
 app.use("/user",userRouter)
 
