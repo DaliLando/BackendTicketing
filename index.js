@@ -17,6 +17,7 @@ connectDB();
 
 
 app.use(cors({origin:'http://localhost:3000' }))
+app.use(cors({credentials:true}))
 app.use(express.json())
 app.use("/auth",authRouter)
 app.use("/event",eventRouter)
